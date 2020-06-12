@@ -15,7 +15,6 @@ hostname = socket.gethostname()
 myp = socket.gethostbyname(hostname)   # get's the computer ip.
 global background
 
-
 # Name: Ariel Ohev
 # input: none
 # output: create the main window of the program with the logo of the program and option to login or register account.
