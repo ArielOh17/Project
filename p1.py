@@ -4,16 +4,21 @@ import socket
 from PIL import ImageGrab, ImageTk  # this libary take a image from the desktop
 import threading
 from PIL import Image
-from pynput.keyboard import Key, Listener
 import pygame
-import time
-import os
+from pygame.locals import *
+import autopy
+from pynput.mouse import Controller
+from pynput.mouse import Button as Button2
+import keyboard
 
-hostname = socket.gethostname()
+hostname = socket.gethostname()     # get's the computer ip.
 myp = socket.gethostbyname(hostname)
-print(myp)
 
 
+
+# Name: Ariel Ohev
+# input: none
+# output: create the main window of the program with the logo of the program and option to login or register account.
 class Main_page:
     def __init__(self, master):
         master.geometry("400x450")
@@ -32,7 +37,9 @@ class Main_page:
         self.reg = Button(base, relief=FLAT, borderwidth=4, text="Register", bg="grey80", width="20", height="2",
                           font=("arial", 12), command=lambda: self.move_page(base, master, "pp"))
         self.reg.pack()
-
+        self.background = ImageTk.PhotoImage(Image.open("logo2.png"))
+        back1 = Label(base, image=self.background,)
+        back1.place(x=80, y=250)
     def move_page(self, base, master, name="login"):
         base.destroy()
         if name == "login":
@@ -41,6 +48,10 @@ class Main_page:
             Register(master)
 
 
+
+# Name: Ariel Ohev
+#input: none
+#ouput: create the option to create a new account.
 class Register:
     def __init__(self, master):
         master.geometry("400x450")
@@ -80,22 +91,33 @@ class Register:
         self.Password_Box2.bind("<Key>", self.next2)
         self.Password_Box3.bind("<Key>", self.next3)
 
+    # input: none
+    # output: part of the option to move line by pressing enter.
     def next1(self, e):
         if e.char == "\r":
             self.Password_Box2.focus()
 
+    # input: none
+    # output: part of the option to move line by pressing enter.
     def next2(self, e):
         if e.char == "\r":
             self.Password_Box3.focus()
 
+    # input: none
+    # output: part of the option to move line by pressing enter.
     def next3(self, e):
         if e.char == "\r":
             f = self.save()
 
+    # input: none
+    # output: part of the option to move line by pressing enter.
     def move_page(self, base, master, name="login"):
         base.destroy()
         Main_page(master)
 
+    # Name: Ariel Ohev
+    # input: none
+    # output: sending the information of the man that create a new account and senf it to the server so he could save it on the data base.
     def save(self):
         u = self.Password_Box1.get()
         p = self.Password_Box2.get()
@@ -115,6 +137,9 @@ class Register:
         return False
 
 
+#Name: Ariel Ohev
+#input: none
+#output: create the login window and cheking by the server if the information are correct and moving to the other page.
 class LogIN:
     def __init__(self, master):
         master.geometry("400x450")
@@ -187,6 +212,10 @@ class LogIN:
         return False
 
 
+
+#Name: Ariel Ohev
+#input: none
+#output: showing the user id and from this page the users can make the conncetion between them.
 class host:
     def __init__(self, master):
         master.geometry("400x450")
@@ -212,6 +241,9 @@ class host:
                            command=self.conn,
                            font=("arial", 11))
         self.send.place(x=100, y=230)
+        self.photo = ImageTk.PhotoImage(Image.open("logo3.png"))
+        back1 = Label(base, image=self.photo)
+        back1.place(x=110, y=280)
         threading.Thread(target=self.agree_conn).start()
         threading.Thread(target=lambda: self.my_server(base, master)).start()
 
@@ -219,6 +251,9 @@ class host:
         b.destroy()
         server1(c, s, m)
 
+    # Name: Ariel Ohev
+    # input: none
+    # output:
     def agree_conn(self):
         global root
         a = True
@@ -238,6 +273,9 @@ class host:
     def conn(self):
         my_socket.send(("(conn)/" + self.Password_Box1.get() + "/" + my_name).encode('utf-8'))
 
+    # Name: Ariel Ohev
+    # input: ip
+    # output: encrypt the ip so nobody can now what's the other ip is.
     def makeid(self, add):
         id = ""
         i = 0
@@ -286,6 +324,9 @@ class host:
         print(id)
         return id
 
+    # Name: Ariel Ohev
+    # input: ip
+    # output: make a server so the client's can make a peer to peer connection.
     def my_server(self, b, m):
         server_socket = socket.socket()
         server_socket.bind(("0.0.0.0", 8081))
@@ -295,6 +336,9 @@ class host:
         self.move_page(b, m, conn, server_socket)
 
 
+#Name: Ariel Ohev
+#input: ip
+#output: connect to the server and make a peer to peer connection between client's.
 class client1:
     def __init__(self, addr):
         print('client')
@@ -315,7 +359,9 @@ class server1:
         my_sever[1] = ser
         root.destroy()
 
-
+#Name: Ariel Ohev
+#input: string
+#checking if the string is send and start taking a screen image and send it by sockets.
 def screenss(name):
     if name == "send":
         print("start")
@@ -328,16 +374,44 @@ def screenss(name):
             im.close()
             my_client[1].sendall(r_im)
 
+#Name: Ariel Ohev
+#input: None
+#output: getting the mouse information and keyboard information and call the setmousevalues.
+def keys():
+    print("recv")
+    while True:
+        a = my_client[1].recv(4096)
+        print(a.decode())
+        a = str(a)
+        a = a[2:-1]
+        a = a.split(",",4)
+        print(a)
+        setMouseValues(a[4], a[0], a[1], a[2], a[3])
 
-my_sever = ["conn", "ser"]
-my_client = ["addr", "soc"]
+#Name: Ariel Ohev
+#input: mouse information and keyboard information
+#output: move the cursur of the mouse and preesing the mouse and pressing the keyboard.
+def setMouseValues(ch, X, Y, LB, RB):
+
+        autopy.mouse.move(int(X),int(Y))
+
+        if int(LB) ==1:
+            m.click(Button2.left, 1)
+        if int(RB) ==1:
+            m.click(Button2.right, 1)
+
+        if ch != 'None':
+            keyboard.press_and_release(ch)
+
+my_sever = ["conn", "ser"]# by this string's the program can know who's the server.
+my_client = ["addr", "soc"]# by this string's the program can know who's the client.
 my_name = ""
-
+m = Controller()
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 myp = '127.0.0.1'
-my_socket.connect(('192.168.1.19', 8080))
+my_socket.connect(('192.168.56.1', 8080))
 root = Tk()
-root.title(myp)
+root.title("AViewer")
 Main_page(root)
 root.mainloop()
 print(my_sever)
@@ -349,7 +423,30 @@ if my_client[0] == "addr":
     done = False
     c = pygame.time.Clock()
     while not done:
-        d = my_sever[0][0].recv(40960000)
+        (ch, LB, RB) = ('None', 0, 0)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+                    done = True
+                else:
+                    print(pygame.key.name(event.key))
+                    ch = pygame.key.name(event.key)             #getting the keyboard char pressed by pygame.
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                print("in mousebuttondown")
+                print("mouse  : %d" % event.button)
+                if event.button == 1:                           #check if the mouse button pressed.
+                    LB = 1
+                elif event.button == 3:
+                    RB = 1
+        (X, Y) = pygame.mouse.get_pos()                         #getting the mouse cursur position.
+        mouse_data = "%d,%d,%d,%d" % (X, Y, LB, RB)
+        all_data = mouse_data+","+ str(ch)
+        print(all_data)
+        my_sever[0][0].send(all_data.encode('utf-8'))           #send the mouse information and keyboard information
+        d = my_sever[0][0].recv(40960000)                       #getting the photo of the screen and show's it on the pygame window.
         try:
             myfile = open("screen.png", 'wb')
             myfile.write(d)
@@ -366,7 +463,8 @@ if my_client[0] == "addr":
         screen.blit(img2, (0, 0))
         pygame.display.flip()
         #os.remove("screen.png")
+        c.tick(30)
 
-        c.tick(10)
 else:
-    threading.Thread(target=lambda: screenss("send")).start()
+    threading.Thread(target=lambda: screenss("send")).start()       #call the function that getting the screen image by threading.
+    threading.Thread(target=lambda: keys()).start()                 #call the function that applies the mouse information and keyboard information on the computer.
